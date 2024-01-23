@@ -107,7 +107,7 @@ def samples_from_dataset(main_value, main_feature, time_feature, timeseries_data
     history = dataset_history(timeseries_data["paths"]+event_data["paths"], main_feature, time_feature, main_value)
 
     for path, group_feature, bucket_values in zip(timeseries_data["paths"], timeseries_data["group_features"], timeseries_data["bucket_values"]):
-
+        
             # Step b & c: Load the file in a DataFrame and fix time_feature's timezone
         ts_df = pd.read_csv(path, parse_dates=[time_feature])
         ts_df[time_feature] = ts_df[time_feature].apply(lambda x: x.tz_localize(None).tz_localize('UTC'))
