@@ -1,0 +1,8 @@
+# Specify filepatterns you want git to ignore.
+
+.DS_Store
+*.csv
+!processed_data/*/*.csv
+sources/__pycache__
+*.dot
+*.png
