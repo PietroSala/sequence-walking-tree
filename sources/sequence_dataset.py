@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 from sklearn.cluster import MeanShift
 import numpy as np
+from random import sample
 
 class DataFrameHelper():
 
@@ -110,9 +111,12 @@ class SequenceDataset():
             r_df.loc[c].probability = weighted_df.loc[c].weight/total
         return r_df
     
-    def get_weights(self, ids, weight_index=0):
-        r = self.sample_df[self.sample_df.index.isin(ids)].groupby(["class"]).sum(weight_index)
-        r.rename({weight_index:"weight"}, inplace=True, axis=1)
+    def get_weights(self, ids, weight_index=0, ignore_class= False):
+        if ignore_class:
+            r = self.sample_df[self.sample_df.index.isin(ids)][weight_index].sum()
+        else:    
+            r = self.sample_df[self.sample_df.index.isin(ids)].groupby(["class"]).sum(weight_index)
+            r.rename({weight_index:"weight"}, inplace=True, axis=1)
         return r
     
     def split_by_test(self, test_type, test, current_positions, weight_index=0, loss_function=LossHelper.information_gain):
@@ -125,22 +129,24 @@ class SequenceDataset():
         r_loss = loss_function(self.get_weights(true_samples, weight_index), self.get_weights(false_samples, weight_index)) 
         return r_loss, added, current_positions.difference(removed)    
     
-    def max_by_test(self, test_type, current_positions,  weight_index=0, loss_function=LossHelper.information_gain):
+    def max_by_test(self, test_type, current_positions,  weight_index=0, loss_function=LossHelper.information_gain, random_samples = None):
         if test_type == "event":
-            test_set = SequenceDataset.event_tests(self.select_next(current_positions))
+            test_set = SequenceDataset.event_tests(self.select_next(current_positions), random_samples)
         elif test_type == "value":
-            test_set = SequenceDataset.value_tests(self.select_value(current_positions))
+            test_set = SequenceDataset.value_tests(self.select_value(current_positions), random_samples)
         best_value, best_test, best_true, best_false = 0, None, None, None
         for test in test_set:
             current_value, current_true, current_false = self.split_by_test(test_type,test, current_positions, weight_index, loss_function)
             if current_value > best_value:
                 best_value, best_test, best_true, best_false = current_value, test, current_true, current_false
-        return best_value, best_test, best_true, best_false       
+        best_true_weights  = self.get_weights([i for i,_ in best_true], weight_index,ignore_class=True) if best_true is not None else 0
+        best_false_weights = self.get_weights([i for i,_ in best_false], weight_index,ignore_class=True) if best_false is not None else 0
+        return best_value, best_test, best_true, best_false, best_true_weights, best_false_weights       
     
     def init_positions(self, weight_index = 0):
         return {(i,0) for i in self.sample_df[self.sample_df[weight_index] > 0].index}
     
-    def excluded_positions(self, weight_index=0):
+    def excluded_positions(self, weight_index = 0):
         return {(i,0) for i in self.sample_df[self.sample_df[weight_index] == 0].index}
     
     def filter_out_last_positions(self, current_positions):
@@ -151,18 +157,26 @@ class SequenceDataset():
 
 
     @staticmethod
-    def event_tests(select_next_df):
+    def event_tests(select_next_df, random_samples = None):
+        if random_samples is not None:
+            l = len(select_next_df)
+            sids = sample(range(l), k=min(random_samples,l))
+            return set([ (r[0][2], r[1].distance) for r in select_next_df[[ i in sids for i in range(l)]].iterrows()])
         return set([ (r[0][2], r[1].distance) for r in select_next_df.iterrows()])
     
     @staticmethod
-    def value_tests(select_value_df):
+    def value_tests(select_value_df, random_samples = None):
+        if random_samples is not None:
+            l = len(select_value_df)
+            sids = sample(range(l), k=min(random_samples,l))
+            return set([ r[1].value for r in select_value_df[[ i in sids for i in range(l)]].iterrows()])
         return set([ r[1].value for r in select_value_df.iterrows()])
     
     @staticmethod
     def true_event_test(select_next_df, event, distance):
         label_selected = select_next_df.loc[(slice(None), slice(None), event)]
         distance_selected = label_selected[label_selected.distance <= distance]
-        samples, removed, added = set(), set(),set()
+        samples, removed, added = set(), set(), set()
         for r in distance_selected.iterrows():
             samples.add(r[0][0])
             removed.add((r[0][0], r[0][1]))
