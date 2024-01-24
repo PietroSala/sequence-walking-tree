@@ -3,6 +3,7 @@
 .DS_Store
 *.csv
 !processed_data/*/*.csv
+!datasets/*.csv
 sources/__pycache__
 *.dot
 *.png
