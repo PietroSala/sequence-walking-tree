@@ -39,6 +39,8 @@ def bucket_to_interval(lst): #we suppose that the list has a single feature of t
 def create_intervals(created_buckets):
     cb = created_buckets[created_buckets.values_in_bucket.apply(lambda x: len(x)>0)].copy()
     cb["intervals_in_bucket"] = cb.values_in_bucket.apply(lambda x: bucket_to_interval(x)) 
+    if len(cb["intervals_in_bucket"]) == 0:
+        return pd.DataFrame({"bucket": [], "interval": []})
     r = pd.concat([pd.DataFrame([{"bucket": row[1].bucket, "interval": i} for i in row[1].intervals_in_bucket])  for row in cb.iterrows()])
     r.reset_index(inplace=True, drop=True)
     return r

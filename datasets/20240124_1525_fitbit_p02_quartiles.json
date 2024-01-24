@@ -1,0 +1,67 @@
+{
+  "main_value": "p02",
+  "main_feature": "participant",
+  "time_feature": "vt",
+  "timeseries_df_list": {
+    "paths": [
+      "processed_data/fitbit/calories.csv",
+      "processed_data/fitbit/distance.csv",
+      "processed_data/fitbit/steps.csv",
+      "processed_data/fitbit/heart_rate.csv"
+    ],
+    "group_features": [
+      "calories",
+      "distance",
+      "steps",
+      "bpm"
+    ],
+    "bucket_values": [
+      [
+        1.2,
+        1.57
+      ],
+      [
+        1860
+      ],
+      [
+        26
+      ],
+      [
+        46,
+        53,
+        62
+      ]
+    ]
+  },
+  "event_df_list": {
+    "paths": [
+      "processed_data/fitbit/exercise.csv",
+      "processed_data/fitbit/sleep_score.csv",
+      "processed_data/fitbit/sleep.csv"
+    ],
+    "group_features": [
+      "Activity",
+      "label",
+      "sleep_phase"
+    ],
+    "value_feature": [
+      "value",
+      "value",
+      "value"
+    ]
+  },
+  "slicer_params": {
+    "stride": 24,
+    "ow": 20,
+    "ww": 4,
+    "pw": 48,
+    "granularity": "hours"
+  },
+  "class": {
+    "SleepScore": [
+      67,
+      73,
+      76
+    ]
+  }
+}
