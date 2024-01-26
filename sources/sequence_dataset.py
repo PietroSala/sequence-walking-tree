@@ -82,6 +82,7 @@ class SequenceDataset():
         self.last_position_df.sort_index(inplace=True)
 
         self.predictions = {}
+        self.forest_prediction = {}
 
     def add_prediction_dataframe(self, weight_index):
         index = pd.Index([], name='sample')
