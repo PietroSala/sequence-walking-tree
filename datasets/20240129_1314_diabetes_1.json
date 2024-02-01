@@ -1,0 +1,29 @@
+{
+  "main_value": 1,
+  "main_feature": "patient",
+  "time_feature": "vt",
+  "timeseries_df_list": {
+    "paths": [],
+    "group_features": [],
+    "bucket_values": []
+  },
+  "event_df_list": {
+    "paths": [
+      "processed_data/diabetes/diabetes_all_clean.csv"
+    ],
+    "group_features": [
+      "label"
+    ],
+    "value_feature": [
+      "value"
+    ]
+  },
+  "slicer_params": {
+    "stride": 12,
+    "ow": 12,
+    "ww": 4,
+    "pw": 12,
+    "granularity": "hours"
+  },
+  "class": "Hypoglycemic symptoms"
+}
